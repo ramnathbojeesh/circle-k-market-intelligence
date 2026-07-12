@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Circle K — Market Intelligence &amp; Assortment Opportunity Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --mw-teal:#28BBBB; --mw-teal-dark:#1C7070; --mw-teal-medium:#00A7A5;
+  --mw-teal-t1:#A3DFDF; --mw-teal-t2:#C0EBEB; --mw-teal-t3:#E1EFF0;
+  --mw-white:#FFFFFF; --mw-black:#1A1A1A; --mw-gray:#F0F4F4;
+  --mw-orange:#FF6221; --mw-orange-tint:#FFDDCC;
+  --fg-muted:#555555; --fg-subtle:#8A9494; --border:#D7E1E1; --divider:#E8EDED;
+  --danger:#C0392B; --danger-pale:#FBEAE8; --warning:#B37B00; --warning-pale:#FFF3D6;
+  --success:#1C7070; --success-pale:#E1EFF0;
+  --sim:#7A5CA8; --sim-pale:#F0EAF8;
+  --r-md:8px; --r-lg:12px; --r-pill:999px;
+  --shadow-sm:0 2px 6px rgba(26,26,26,.06); --shadow-md:0 6px 18px rgba(26,26,26,.08);
+}
+*{box-sizing:border-box}
+body{font-family:'Poppins',system-ui,Arial,sans-serif;color:var(--mw-black);margin:0;background:var(--mw-gray);font-size:14px;line-height:1.5}
+h1,h2,h3,h4{line-height:1.15;letter-spacing:-0.005em;margin:0 0 8px}
+h2{font-size:24px;font-weight:700}
+h3{font-size:17px;font-weight:600}
+h4{font-size:14px;font-weight:600}
+p{margin:0 0 10px}
+a{color:var(--mw-teal-dark)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+
+/* header */
+.hero{background:var(--mw-teal-dark);color:#fff;padding:34px 0 26px}
+.hero .brandline{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.hero .logo{font-weight:900;font-size:19px;letter-spacing:-.01em}
+.hero .logo span{color:var(--mw-teal-t1)}
+.hero h1{font-size:clamp(26px,3.4vw,40px);font-weight:900;max-width:900px}
+.hero .sub{color:var(--mw-teal-t2);max-width:860px;font-size:14px}
+.hero .metachips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{display:inline-block;padding:3px 12px;border-radius:var(--r-pill);font-size:11.5px;font-weight:600;background:rgba(255,255,255,.14);color:#fff}
+.chip.orange{background:var(--mw-orange);color:#fff}
+
+/* provenance chips */
+.prov{display:inline-block;padding:1px 8px;border-radius:var(--r-pill);font-size:10px;font-weight:700;letter-spacing:.04em;vertical-align:middle}
+.prov.live{background:var(--mw-teal-t3);color:var(--mw-teal-dark)}
+.prov.model{background:var(--warning-pale);color:var(--warning)}
+.prov.sim{background:var(--sim-pale);color:var(--sim)}
+.prov.us{background:#EDEDED;color:#666}
+.prov.state{background:var(--mw-teal-dark);color:#fff}
+
+/* tabs */
+.tabbar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.tabbar .wrap{display:flex;gap:2px;overflow-x:auto}
+.tabbtn{border:0;background:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--fg-muted);padding:14px 13px 11px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tabbtn:hover{color:var(--mw-teal-dark)}
+.tabbtn.active{color:var(--mw-teal-dark);border-bottom-color:var(--mw-teal)}
+.tabnum{display:inline-block;background:var(--mw-teal-t3);color:var(--mw-teal-dark);border-radius:var(--r-pill);font-size:10px;padding:0 6px;margin-right:5px;font-weight:700}
+.tab{display:none;padding:28px 0 40px}
+.tab.active{display:block}
+
+/* cards & layout */
+.card{background:#fff;border-radius:var(--r-lg);padding:20px 22px;box-shadow:var(--shadow-sm);margin-bottom:18px}
+.card.tight{padding:16px 18px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.kpi{background:var(--mw-teal-t3);border-radius:var(--r-lg);padding:16px 18px}
+.kpi .n{font-size:26px;font-weight:900;color:var(--mw-teal-dark)}
+.kpi .l{font-size:11.5px;color:var(--fg-muted);font-weight:500}
+.note{font-size:12px;color:var(--fg-subtle)}
+.callout{border-left:3px solid var(--mw-teal);background:var(--mw-teal-t3);padding:12px 16px;border-radius:0 var(--r-md) var(--r-md) 0;margin:12px 0}
+.callout.warn{border-color:var(--warning);background:var(--warning-pale)}
+.callout.danger{border-color:var(--danger);background:var(--danger-pale)}
+.callout.sim{border-color:var(--sim);background:var(--sim-pale)}
+.simbanner{background:var(--sim-pale);border:1.5px dashed var(--sim);border-radius:var(--r-lg);padding:12px 18px;font-size:12.5px;color:#4a3670;margin-bottom:18px;font-weight:500}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--mw-teal-dark);color:#fff;text-align:left;padding:8px 10px;font-weight:600;font-size:11.5px;position:sticky;top:0}
+td{padding:8px 10px;border-bottom:1px solid var(--divider);vertical-align:top}
+tr:nth-child(even) td{background:#FAFCFC}
+.tscroll{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+
+/* pills */
+.pill{display:inline-block;padding:2px 10px;border-radius:var(--r-pill);font-size:10.5px;font-weight:700}
+.st-nascent{background:#EDEDED;color:#555}
+.st-emerging{background:var(--mw-teal-t2);color:var(--mw-teal-dark)}
+.st-accelerating{background:var(--mw-teal);color:#fff}
+.st-peaking{background:var(--warning-pale);color:var(--warning)}
+.st-sustained{background:var(--mw-teal-t3);color:var(--mw-teal-dark)}
+.st-declining{background:var(--danger-pale);color:var(--danger)}
+.st-campaign{background:var(--mw-orange-tint);color:#B0430F}
+.st-insufficient{background:#EDEDED;color:#888}
+.act-test{background:var(--mw-teal);color:#fff}
+.act-expand{background:var(--mw-teal-dark);color:#fff}
+.act-monitor{background:var(--warning-pale);color:var(--warning)}
+.act-avoid{background:var(--danger-pale);color:var(--danger)}
+.act-maintain{background:#EDEDED;color:#555}
+.risk-hi{background:var(--danger-pale);color:var(--danger)}
+.risk-med{background:var(--warning-pale);color:var(--warning)}
+.risk-low{background:var(--success-pale);color:var(--success)}
+
+/* score bars */
+.sbar{display:flex;align-items:center;gap:8px}
+.sbar .track{flex:1;height:7px;background:var(--divider);border-radius:var(--r-pill);overflow:hidden;min-width:50px}
+.sbar .fill{height:100%;background:var(--mw-teal);border-radius:var(--r-pill)}
+.sbar .v{font-weight:700;font-size:12px;min-width:26px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* rec cards */
+.rec{border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;background:#fff}
+.rec .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.rec h4{font-size:15px;margin:0}
+.rec .brand{font-size:11.5px;color:var(--fg-subtle)}
+.rec .scores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+.rec .sc{background:var(--mw-gray);border-radius:var(--r-md);padding:6px 8px;text-align:center}
+.rec .sc .v{font-size:16px;font-weight:900;color:var(--mw-teal-dark)}
+.rec .sc.simsc .v{color:var(--sim)}
+.rec .sc .l{font-size:9px;color:var(--fg-subtle);font-weight:600;letter-spacing:.02em}
+.rec .body{font-size:12.5px;color:var(--fg-muted)}
+.rec .evid{font-size:11.5px;color:var(--fg-subtle);margin-top:8px;border-top:1px dashed var(--divider);padding-top:8px}
+
+/* misc */
+.flex{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spacer{height:8px}
+details{border:1px solid var(--border);border-radius:var(--r-md);padding:10px 14px;margin-bottom:10px;background:#fff}
+details summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--mw-teal-dark)}
+details[open]{background:#FCFEFE}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--fg-muted);margin:8px 0}
+.leg span{display:flex;align-items:center;gap:5px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+canvas{max-width:100%}
+.chartbox{position:relative;height:280px}
+.chartbox.tall{height:340px}
+
+/* simulator */
+.simgrid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+@media(max-width:900px){.simgrid{grid-template-columns:1fr}}
+.ctrl{margin-bottom:12px}
+.ctrl label{display:block;font-size:11.5px;font-weight:600;color:var(--fg-muted);margin-bottom:3px}
+.ctrl select,.ctrl input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:13px;background:#fff}
+.ctrl input[type=range]{padding:0}
+.decision{font-size:20px;font-weight:900;color:#fff;background:var(--mw-teal);display:inline-block;padding:6px 18px;border-radius:var(--r-md)}
+.outrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--divider);font-size:12.5px}
+.outrow b{font-variant-numeric:tabular-nums}
+
+/* weights editor */
+.wrow{display:grid;grid-template-columns:180px 1fr 44px;gap:10px;align-items:center;margin-bottom:6px;font-size:12px}
+
+footer{background:var(--mw-black);color:#B9C4C4;padding:26px 0;font-size:11.5px;margin-top:30px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="brandline">
+      <div class="logo">meltwater<span> ×</span> Circle K</div>
+      <div class="chip">Prototype · Sales demonstration build</div>
+    </div>
+    <h1>Market intelligence &amp; assortment opportunity engine</h1>
+    <p class="sub">Which products should Circle K stock, test, promote, expand, maintain, reduce or avoid — based on external consumer momentum, current assortment and observed commercial demand. Signal → Product → Audience → Geography → Commercial validation → Assortment gap → Recommended action.</p>
+    <div class="metachips">
+      <span class="chip orange">Soft drinks · Energy drinks</span>
+      <span class="chip">United States · TX · AZ · NC · SC</span>
+      <span class="chip">Current period: 13 Apr – 12 Jul 2026</span>
+      <span class="chip">Retrospective: Dec 2025 · Jan 2026 (kept separate)</span>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar"><div class="wrap">
+  <button class="tabbtn active" data-tab="t1"><span class="tabnum">1</span>Executive brief</button>
+  <button class="tabbtn" data-tab="t2"><span class="tabnum">2</span>Trend discovery</button>
+  <button class="tabbtn" data-tab="t3"><span class="tabnum">3</span>Virality &amp; proponents</button>
+  <button class="tabbtn" data-tab="t4"><span class="tabnum">4</span>Audience &amp; tribes</button>
+  <button class="tabbtn" data-tab="t5"><span class="tabnum">5</span>Trend lifecycle</button>
+  <button class="tabbtn" data-tab="t6"><span class="tabnum">6</span>Social-to-sales</button>
+  <button class="tabbtn" data-tab="t7"><span class="tabnum">7</span>Competitive intel</button>
+  <button class="tabbtn" data-tab="t8"><span class="tabnum">8</span>Decision simulator</button>
+  <button class="tabbtn" data-tab="t9"><span class="tabnum">M</span>Methodology &amp; scoring</button>
+</div></nav>
+
+<main class="wrap">
+<!-- TABS INSERTED BELOW -->
+<section class="tab active" id="t1">
+  <h2>Executive opportunity brief</h2>
+  <p class="note">Highest-value commercial opportunities and risks · <span class="prov live">LIVE Meltwater</span> <span class="prov model">MODELLED scores</span> <span class="prov sim">SIMULATED Circle K data</span> — see Methodology tab for every formula.</p>
+
+  <div class="grid g4" style="margin:14px 0 18px">
+    <div class="kpi"><div class="n">11.59M</div><div class="l">US energy-drink mentions · 13 wks <span class="prov live">LIVE</span></div></div>
+    <div class="kpi"><div class="n">8.69M</div><div class="l">US soft-drink mentions · 13 wks <span class="prov live">LIVE</span></div></div>
+    <div class="kpi"><div class="n">+87%</div><div class="l">Alani Nu mention growth Dec → Jan <span class="prov live">LIVE</span></div></div>
+    <div class="kpi" style="background:var(--mw-orange-tint)"><div class="n" style="color:#B0430F">1</div><div class="l">Own exclusive under-amplified: Celsius Electric Vibe <span class="prov live">LIVE</span></div></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card tight">
+      <h3>Top five to test <span class="pill act-test">Limited-market test</span></h3>
+      <table><tbody>
+        <tr><td>1</td><td><b>Alani Nu Purple Cotton Candy</b> · Energy</td><td><span class="pill st-accelerating">Accelerating</span></td></tr>
+        <tr><td>2</td><td><b>Ghost × 7UP lemon-lime LTO</b> · Energy</td><td><span class="pill st-emerging">Emerging</span></td></tr>
+        <tr><td>3</td><td><b>Poppi Lemonade</b> · Soft drinks</td><td><span class="pill st-accelerating">Accelerating</span></td></tr>
+        <tr><td>4</td><td><b>Dirty-soda-style RTD / dispensed program</b> · Soft drinks</td><td><span class="pill st-accelerating">Accelerating</span></td></tr>
+        <tr><td>5</td><td><b>Electrolit flavored hydration (cooler-adjacent)</b> · Functional</td><td><span class="pill st-emerging">Emerging</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card tight">
+      <h3>Top five to expand <span class="pill act-expand">Expand distribution</span></h3>
+      <table><tbody>
+        <tr><td>1</td><td><b>Celsius Electric Vibe (Circle K exclusive)</b> — amplify, then extend markets</td><td><span class="pill st-campaign">Campaign-driven</span></td></tr>
+        <tr><td>2</td><td><b>Olipop core flavors</b> — sustained organic demand</td><td><span class="pill st-sustained">Sustained</span></td></tr>
+        <tr><td>3</td><td><b>Celsius core range</b> — brand revenue +138% YoY (Q1 CY2026)</td><td><span class="pill st-sustained">Sustained</span></td></tr>
+        <tr><td>4</td><td><b>Mtn Dew Baja Blast singles</b> — Dec→Jan +54%, steady since</td><td><span class="pill st-sustained">Sustained</span></td></tr>
+        <tr><td>5</td><td><b>Alani Nu core range</b> — rides portfolio momentum</td><td><span class="pill st-accelerating">Accelerating</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card tight">
+      <h3>Top five to monitor <span class="pill act-monitor">Monitor weekly</span></h3>
+      <table><tbody>
+        <tr><td>1</td><td><b>Alani Nu Halloween / Witch's Brew</b> — teased 7 Jul, fall drop</td><td><span class="pill st-nascent">Nascent</span></td></tr>
+        <tr><td>2</td><td><b>Gorilla Mind energy</b> — retail cooler expansion teased</td><td><span class="pill st-nascent">Nascent</span></td></tr>
+        <tr><td>3</td><td><b>Pepsi prebiotic soda</b> — launch met with skepticism</td><td><span class="pill st-campaign">Campaign-driven</span></td></tr>
+        <tr><td>4</td><td><b>Ghost Bubblicious</b> — first-look coverage only</td><td><span class="pill st-nascent">Nascent</span></td></tr>
+        <tr><td>5</td><td><b>Red Bull NASCAR LTO can</b> — first retail LTO in 15 yrs</td><td><span class="pill st-campaign">Campaign-driven</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card tight">
+      <h3>Top five to avoid or deprioritise <span class="pill act-avoid">Reduce / do not pursue</span></h3>
+      <table><tbody>
+        <tr><td>1</td><td><b>Bang Energy incremental facings</b> — flat-to-declining share of conversation</td><td><span class="pill st-declining">Declining</span></td></tr>
+        <tr><td>2</td><td><b>Teen-skewing high-caffeine promos in Texas</b> — active AG investigation (Celsius) + wrongful-death suit (Alani distributor)</td><td><span class="pill risk-hi">Risk</span></td></tr>
+        <tr><td>3</td><td><b>Broad prebiotic bets beyond Poppi/Olipop</b> — category skepticism after Poppi's $8.9M settlement</td><td><span class="pill st-insufficient">Insufficient evidence</span></td></tr>
+        <tr><td>4</td><td><b>C4 range extensions</b> — flat 12-week trend, no creator growth signal</td><td><span class="pill st-sustained">Flat</span></td></tr>
+        <tr><td>5</td><td><b>Monster niche SKU adds</b> — large but softening conversation (-10% within window)</td><td><span class="pill st-declining">Softening</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-top:4px">
+    <div class="card tight">
+      <h4>Momentum with no Circle K availability <span class="prov sim">SIM assortment</span></h4>
+      <p class="note">Electrolit Pineapple Coconut (7-Eleven exclusive — exact SKU blocked; adjacent flavors open) · Gorilla Mind · Dirty-soda formats (QSR-only today).</p>
+    </div>
+    <div class="card tight">
+      <h4>Strong sales, weak external momentum <span class="prov sim">SIM sales</span></h4>
+      <p class="note">Dr Pepper core 20oz (hidden performer — steady velocity, flat social) · private-label water. Protect facings; no promo spend needed.</p>
+    </div>
+    <div class="card tight">
+      <h4>At risk of peaking before response</h4>
+      <p class="note">Dirty-soda QSR moment (McDonald's, Crumbl, Dunkin all in-market now; health backlash building) · Purple Cotton Candy launch spike (giveaway-driven component).</p>
+    </div>
+    <div class="card tight">
+      <h4>Major retailer promotions <span class="prov live">LIVE</span></h4>
+      <p class="note">7-Eleven: Free Slurpee Day + $1 Slurpee happy hour all summer; FanLand World Cup (HQ Irving, TX <span class="prov state">State-confirmed</span>) · McDonald's Crafted Beverages incl. Dirty Dr Pepper (391K-engagement TikTok).</p>
+    </div>
+    <div class="card tight">
+      <h4>Emerging cross-category trends</h4>
+      <p class="note">Dirty soda (soda × creamer × QSR) · candy-nostalgia flavors in energy (7UP, Bubblicious, Cotton Candy) · prebiotic/functional migration from grocery to c-store cold vault.</p>
+    </div>
+    <div class="card tight">
+      <h4>Key data-quality caveats</h4>
+      <p class="note">TikTok is undercounted under the US country filter (629 docs vs Instagram 173K) — TikTok momentum is inferred from cross-posts and news. Ghost Jan-2026 figure inflated by a loose boolean (excluded from growth math). Dec-2025 TikTok retrospective is a coverage gap. Full log in Methodology tab.</p>
+    </div>
+  </div>
+
+  <h3 style="margin:22px 0 4px">Priority recommendations</h3>
+  <p class="note">Format per brief: product · geography · stage · five scores · action · rationale · evidence · risks · next step. Commercial validation is <span class="prov sim">SIMULATED</span> pending Circle K data feeds; all other scores are <span class="prov model">MODELLED</span> from live signals.</p>
+  <div class="spacer"></div>
+  <div class="grid g2">
+
+    <div class="rec">
+      <div class="top">
+        <div><h4>Alani Nu — Purple Cotton Candy</h4><div class="brand">Alani Nu (Celsius Holdings) · Energy drinks · US <span class="prov us">US-level proxy</span></div></div>
+        <span class="pill act-test">Limited-market test</span>
+      </div>
+      <div class="scores">
+        <div class="sc"><div class="v">82</div><div class="l">SOCIAL MOMENTUM</div></div>
+        <div class="sc simsc"><div class="v">71</div><div class="l">COMMERCIAL (SIM)</div></div>
+        <div class="sc"><div class="v">64</div><div class="l">COMPETITIVE GAP</div></div>
+        <div class="sc"><div class="v">58</div><div class="l">VIRALITY QUALITY</div></div>
+        <div class="sc"><div class="v">72</div><div class="l">CONFIDENCE</div></div>
+      </div>
+      <div class="body"><b>Stage: Accelerating.</b> Brand mentions +87% Dec→Jan and holding elevated (avg 357/wk current vs 232/wk Jan). Clean launch arc: May tease → June national launch → organic in-hand reviews. Virality quality capped at 58: launch is celebrity-amplified (Becky G giveaway, 1.49M reach), organic share still building.<br><b>Suggested test:</b> 60–100 high-energy-velocity stores, TX + AZ clusters, 6–8 weeks. <b>Success measures:</b> unit velocity vs comparable Alani SKUs, repeat rate, basket attachment, social-to-sales correlation.</div>
+      <div class="evid"><b>Evidence:</b> @alaninutrition launch post 26.3K eng / 1.49M reach (17 Jun) · @snackolator tease 15.1K eng (2 May) · organic review posts from 9 Jun. <b>Risks:</b> giveaway-driven spike component; TX distributor litigation headline risk (see Tab 7). <b>Next step:</b> confirm DSD availability and comparable-SKU baseline with category team.</div>
+    </div>
+
+    <div class="rec">
+      <div class="top">
+        <div><h4>Celsius — Electric Vibe (Circle K exclusive)</h4><div class="brand">Celsius · Energy drinks · US chain-wide <span class="prov us">US-level proxy</span></div></div>
+        <span class="pill act-expand">Support with promotion</span>
+      </div>
+      <div class="scores">
+        <div class="sc"><div class="v">74</div><div class="l">SOCIAL MOMENTUM</div></div>
+        <div class="sc simsc"><div class="v">78</div><div class="l">COMMERCIAL (SIM)</div></div>
+        <div class="sc"><div class="v">21</div><div class="l">COMPETITIVE GAP</div></div>
+        <div class="sc"><div class="v">44</div><div class="l">VIRALITY QUALITY</div></div>
+        <div class="sc"><div class="v">80</div><div class="l">CONFIDENCE</div></div>
+      </div>
+      <div class="body"><b>Stage: Campaign-driven (own asset).</b> Circle K's exclusive Sparkling Tropical Freeze LTO earned trade coverage (CStore Decisions, 28 Apr) but near-zero consumer social echo — an amplification gap on an asset competitors can't copy, while Celsius grows revenue +138% YoY. Low gap score = Circle K already owns it; the gap is awareness, not assortment.<br><b>Action:</b> creator amplification burst (nano/micro tiers, see Tab 3) + cooler-door POS in the 4 focus states before the LTO window closes.</div>
+      <div class="evid"><b>Evidence:</b> CStore Decisions 28 Apr (eng 2,096) · Celsius Q1 CY2026 revenue $782.6M +138% YoY (Barchart, reach 1.8M). <b>Risks:</b> TX AG investigation into Celsius teen marketing — keep activation 18+ and wellness-framed <span class="prov state">State-confirmed (TX)</span>. <b>Next step:</b> brief influencer team; measure lift vs non-promoted control stores.</div>
+    </div>
+
+    <div class="rec">
+      <div class="top">
+        <div><h4>Poppi — Lemonade</h4><div class="brand">Poppi (PepsiCo) · Soft drinks · US <span class="prov us">US-level proxy</span></div></div>
+        <span class="pill act-test">Limited-market test</span>
+      </div>
+      <div class="scores">
+        <div class="sc"><div class="v">76</div><div class="l">SOCIAL MOMENTUM</div></div>
+        <div class="sc simsc"><div class="v">63</div><div class="l">COMMERCIAL (SIM)</div></div>
+        <div class="sc"><div class="v">70</div><div class="l">COMPETITIVE GAP</div></div>
+        <div class="sc"><div class="v">62</div><div class="l">VIRALITY QUALITY</div></div>
+        <div class="sc"><div class="v">68</div><div class="l">CONFIDENCE</div></div>
+      </div>
+      <div class="body"><b>Stage: Accelerating.</b> "Flavor of the summer" push with Love Island in-show placement (3.2M reach) on top of the most positive sentiment profile in either category (64% positive of sentiment-classified mentions — highest measured). Simulated assortment shows Poppi in only ~40% of stores with lemonade unranged.<br><b>Suggested test:</b> 75 stores, 8 weeks, suburban + campus-adjacent clusters; pair with morning daypart promo (audience skews wellness/commuter, Tab 4).</div>
+      <div class="evid"><b>Evidence:</b> @drinkpoppi giveaway 16.7K eng / 681K reach (29 Jun) · Love Island partnership (PR Newswire, 4 Jun) · brand weekly avg 465 vs Jan 412. <b>Risks:</b> $8.9M class-action settlement still cited in health-skeptic content (88.7K-eng TikTok); prebiotic claims scrutiny. <b>Next step:</b> validate against loyalty-basket data once connected.</div>
+    </div>
+
+    <div class="rec">
+      <div class="top">
+        <div><h4>Dirty-soda program (Dirty Dr Pepper lead)</h4><div class="brand">Category play · Soft drinks / dispensed · US <span class="prov us">US-level proxy</span></div></div>
+        <span class="pill act-monitor">Monitor weekly → fast-follow test</span>
+      </div>
+      <div class="scores">
+        <div class="sc"><div class="v">85</div><div class="l">SOCIAL MOMENTUM</div></div>
+        <div class="sc simsc"><div class="v">—</div><div class="l">COMMERCIAL (N/A)</div></div>
+        <div class="sc"><div class="v">88</div><div class="l">COMPETITIVE GAP</div></div>
+        <div class="sc"><div class="v">51</div><div class="l">VIRALITY QUALITY</div></div>
+        <div class="sc"><div class="v">55</div><div class="l">CONFIDENCE</div></div>
+      </div>
+      <div class="body"><b>Stage: Accelerating — but QSR-led, and possibly peaking.</b> The highest-engagement signal in this pull (McDonald's Crafted Beverages TikTok, 391K eng; 25–38M-reach news items). Circle K has fountain infrastructure QSRs are spending to build. Virality quality capped: momentum is retailer-led, and a loud health-backlash counter-narrative ("metabolic disaster", 38M reach) is building.<br><b>Action:</b> weekly tracking alert; scope a 20-store dispensed pilot with a lighter-sugar recipe to pre-empt the backlash.</div>
+      <div class="evid"><b>Evidence:</b> McDonald's lineup TikTok 391K eng (25 Apr) · Crumbl Dirty Sodas (186g sugar callout, 53.7K eng, 3.74M reach) · NewsNation "fast food's new battleground" 10.1M reach. <b>Risks:</b> trend peaks before rollout; sugar-content reputational exposure. <b>Next step:</b> decision checkpoint in 4 weeks with refreshed momentum score.</div>
+    </div>
+
+  </div>
+</section>
+<!-- TAB1 -->
+<section class="tab" id="t2">
+  <h2>Product trend discovery</h2>
+  <p class="note">Product-, flavor- and variant-level momentum. Discovery blends mention velocity, acceleration, creator growth, cross-platform spread, sentiment and persistence — never raw volume alone. Per guardrails, <b>energy drinks and soft drinks are ranked separately</b>.</p>
+
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>Category volume by week <span class="prov live">LIVE</span></h3><div class="chartbox"><canvas id="chCat"></canvas></div><p class="note">US mentions, week beginning. Energy spike w/c 22 Jun coincides with Red Bull NASCAR LTO news + summer sports.</p></div>
+    <div class="card"><h3>Emerging product momentum — indexed <span class="prov live">LIVE</span></h3><div class="chartbox"><canvas id="chIdx"></canvas></div><p class="note">Weekly mentions indexed to each product's first week (=100). Trajectory comparison only — absolute volumes differ by 10×; see tables.</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Energy drinks — product table</h3>
+    <div class="tscroll"><table>
+      <thead><tr><th>Product / variant</th><th>Brand</th><th>First detected</th><th class="num">12-wk vol</th><th class="num">Jan 2026</th><th class="num">Dec 2025</th><th>Growth signal</th><th>Sentiment (pos/neu/neg)</th><th>Platform lead</th><th>Geo</th><th>Stage</th><th>TPV</th><th>Organic conf.</th><th>Data conf.</th></tr></thead>
+      <tbody>
+        <tr><td><b>Purple Cotton Candy</b></td><td>Alani Nu</td><td>2 May 26 (tease)</td><td class="num">4,637*</td><td class="num">1,158</td><td class="num">618</td><td>+87% Dec→Jan; holding elevated</td><td>22 / 62 / 15% ⚠</td><td>Instagram</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-accelerating">Accelerating</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:82%"></div></div><span class="v">82</span></div></td><td>Medium</td><td>High</td></tr>
+        <tr><td><b>Electric Vibe (Circle K excl.)</b></td><td>Celsius</td><td>28 Apr 26</td><td class="num">7,074*</td><td class="num">2,580</td><td class="num">2,230</td><td>+16% Dec→Jan; trade-press led</td><td>23 / 61 / 16%</td><td>News / X</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-campaign">Campaign-driven</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:74%"></div></div><span class="v">74</span></div></td><td>Low (brand-led)</td><td>High</td></tr>
+        <tr><td><b>7UP lemon-lime LTO</b></td><td>Ghost × KDP</td><td>14 Apr 26</td><td class="num">2,521</td><td class="num">n/a ⚠</td><td class="num">743</td><td>Flat base + fresh LTO news</td><td>34 / 55 / 10%</td><td>News / Instagram</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-emerging">Emerging</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:58%"></div></div><span class="v">58</span></div></td><td>Medium</td><td>Medium ⚠</td></tr>
+        <tr><td><b>Bubblicious</b></td><td>Ghost</td><td>3 May 26</td><td class="num">&lt;300 est.</td><td class="num">—</td><td class="num">—</td><td>Single first-look post</td><td>n/a — low sample</td><td>Instagram</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-nascent">Nascent</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:41%"></div></div><span class="v">41</span></div></td><td>Unknown</td><td>Low</td></tr>
+        <tr><td><b>Pineapple Coconut (7-Eleven excl.)</b></td><td>Electrolit</td><td>7 May 26</td><td class="num">n/a</td><td class="num">—</td><td class="num">—</td><td>Launch burst, eng 14.8K</td><td>n/a — low sample</td><td>News</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-emerging">Emerging</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:66%"></div></div><span class="v">66</span></div></td><td>Medium</td><td>Low</td></tr>
+        <tr><td><b>Retail expansion (teased)</b></td><td>Gorilla Mind</td><td>18 May 26</td><td class="num">n/a</td><td class="num">—</td><td class="num">—</td><td>Owned-channel tease, eng 3.1K</td><td>n/a — low sample</td><td>Instagram</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-nascent">Nascent</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:55%"></div></div><span class="v">55</span></div></td><td>Low (brand-led)</td><td>Low</td></tr>
+        <tr><td><b>NASCAR LTO can</b></td><td>Red Bull</td><td>29 Jun 26</td><td class="num">302,507*</td><td class="num">—</td><td class="num">—</td><td>Large flat base + campaign news</td><td>n/a at variant level</td><td>X / TV</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-campaign">Campaign-driven</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:48%"></div></div><span class="v">48</span></div></td><td>Low (brand-led)</td><td>Medium</td></tr>
+        <tr><td><b>Core range</b></td><td>Monster</td><td>—</td><td class="num">210,178</td><td class="num">—</td><td class="num">—</td><td>-10% within window (23.3K→12.3K/wk)</td><td>n/a at variant level</td><td>X / TV</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-declining">Softening</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:40%"></div></div><span class="v">40</span></div></td><td>—</td><td>High</td></tr>
+        <tr><td><b>Core range</b></td><td>C4</td><td>—</td><td class="num">2,930</td><td class="num">—</td><td class="num">—</td><td>Flat, no creator growth</td><td>n/a — small base</td><td>Mixed</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-sustained">Flat</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:35%"></div></div><span class="v">35</span></div></td><td>Medium</td><td>Medium</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">* Brand-level mention totals (variant-level splits not separable in boolean; variant attribution from document evidence). ⚠ Ghost Jan-2026 excluded — boolean pollution inflated the figure ~16× (see Methodology tab). Alani sentiment base includes bare-"Alani" matches — treat split as directional. Views/likes/shares are platform-reported on the evidence posts in Tab 3; unique-creator counts are directional (document sampling), not census.</p>
+  </div>
+
+  <div class="card">
+    <h3>Soft drinks — product table</h3>
+    <div class="tscroll"><table>
+      <thead><tr><th>Product / variant</th><th>Brand</th><th>First detected</th><th class="num">12-wk vol</th><th class="num">Jan 2026</th><th class="num">Dec 2025</th><th>Growth signal</th><th>Sentiment (pos/neu/neg)</th><th>Platform lead</th><th>Geo</th><th>Stage</th><th>TPV</th><th>Organic conf.</th><th>Data conf.</th></tr></thead>
+      <tbody>
+        <tr><td><b>Dirty soda (category trend)</b></td><td>Multi (Dr Pepper base)</td><td>Pre-window; QSR wave Apr 26</td><td class="num">n/a (trend)</td><td class="num">—</td><td class="num">—</td><td>Highest engagement in pull (391K single post)</td><td>Polarized — health backlash</td><td>TikTok / News</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-accelerating">Accelerating</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:85%"></div></div><span class="v">85</span></div></td><td>Medium (QSR-led)</td><td>Medium</td></tr>
+        <tr><td><b>Lemonade</b></td><td>Poppi</td><td>29 Jun 26 (push)</td><td class="num">6,047*</td><td class="num">1,648</td><td class="num">1,371</td><td>+20% Dec→Jan; May–Jun peaks 1,214/wk</td><td><b>64 / 34 / 2%</b> — most positive measured</td><td>Instagram / TikTok</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-accelerating">Accelerating</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:76%"></div></div><span class="v">76</span></div></td><td>Medium</td><td>High</td></tr>
+        <tr><td><b>Core flavors</b></td><td>Olipop</td><td>—</td><td class="num">8,670</td><td class="num">864</td><td class="num">776</td><td>Sustained 411–1,399/wk; +11% Dec→Jan</td><td>62 / 35 / 3% ⚠</td><td>Instagram</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-sustained">Sustained</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:72%"></div></div><span class="v">72</span></div></td><td><b>High</b></td><td>High</td></tr>
+        <tr><td><b>Baja Blast (retail singles)</b></td><td>Mountain Dew</td><td>—</td><td class="num">22,275</td><td class="num">3,297</td><td class="num">2,147</td><td>+54% Dec→Jan; steady since</td><td>32 / 54 / 15%</td><td>X / TikTok</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-sustained">Sustained</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:68%"></div></div><span class="v">68</span></div></td><td>High</td><td>High</td></tr>
+        <tr><td><b>Prebiotic cola (new)</b></td><td>Pepsi</td><td>16 Jun 26</td><td class="num">n/a</td><td class="num">—</td><td class="num">—</td><td>Launch burst met by 88.7K-eng critique</td><td>Skeptical skew</td><td>TikTok</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-campaign">Campaign-driven</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:45%"></div></div><span class="v">45</span></div></td><td>Low (brand-led)</td><td>Low</td></tr>
+        <tr><td><b>Core range</b></td><td>Dr Pepper</td><td>—</td><td class="num">166,897 ⚠</td><td class="num">—</td><td class="num">—</td><td>Large, stable; dirty-soda halo</td><td>n/a at variant level</td><td>X / TV</td><td><span class="prov us">US proxy</span></td><td><span class="pill st-sustained">Established</span></td><td><div class="sbar"><div class="track"><div class="fill" style="width:50%"></div></div><span class="v">50</span></div></td><td>High</td><td>Medium ⚠</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">⚠ Dr Pepper total includes bare-"KDP" ticker matches (minor pollution). Olipop sentiment base included generic "prebiotic soda" terms — positive share may be category-inflated.</p>
+  </div>
+
+  <div class="grid g3">
+    <div class="card tight"><h4>Fastest growing (Dec→Jan, live)</h4>
+      <div class="sbar"><span style="width:110px;font-size:12px">Baja Blast</span><div class="track"><div class="fill" style="width:54%"></div></div><span class="v">+54%</span></div>
+      <div class="sbar"><span style="width:110px;font-size:12px">Alani Nu</span><div class="track"><div class="fill" style="width:87%"></div></div><span class="v">+87%</span></div>
+      <div class="sbar"><span style="width:110px;font-size:12px">Poppi</span><div class="track"><div class="fill" style="width:20%"></div></div><span class="v">+20%</span></div>
+      <div class="sbar"><span style="width:110px;font-size:12px">Celsius</span><div class="track"><div class="fill" style="width:16%"></div></div><span class="v">+16%</span></div>
+      <div class="sbar"><span style="width:110px;font-size:12px">Olipop</span><div class="track"><div class="fill" style="width:11%"></div></div><span class="v">+11%</span></div>
+      <p class="note" style="margin-top:8px">Ghost excluded (polluted Jan boolean).</p>
+    </div>
+    <div class="card tight"><h4>Reach high, creator diversity low ⚠</h4>
+      <p class="note">Flag per brief: <b>Celsius Electric Vibe</b> (trade press only, no consumer creators yet) · <b>Pepsi prebiotic</b> (brand burst + one mega-critique) · <b>Red Bull NASCAR</b> (single-campaign driver). High reach here is not proof of consumer adoption.</p>
+    </div>
+    <div class="card tight"><h4>Strong organic momentum</h4>
+      <p class="note"><b>Olipop</b> — steadiest baseline, 62% positive, no single campaign spike · <b>Baja Blast</b> — persistent fan conversation across X/TikTok · <b>Alani Cherry Twist</b> — unprompted Pinterest/IG fan posts with zero brand tags.</p>
+    </div>
+  </div>
+</section>
+<!-- TAB2 -->
+<section class="tab" id="t3">
+  <h2>Virality &amp; proponent analysis</h2>
+  <p class="note">Who is driving each trend, and whether momentum is organic, influencer-led, retailer-led or brand-amplified. Sponsorship labels follow evidence rules: content is never called sponsored without disclosure evidence.</p>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Key evidence posts — classified <span class="prov live">LIVE</span></h3>
+    <div class="tscroll"><table>
+      <thead><tr><th>Post / item</th><th>Account</th><th>Tier</th><th>Proponent class</th><th>Sponsorship label</th><th class="num">Engagement</th><th class="num">Reach</th><th>Product</th></tr></thead>
+      <tbody>
+        <tr><td>McDonald's Crafted Beverages lineup (25 Apr, TikTok)</td><td>Consumer food account</td><td>Micro–mid</td><td>Organic consumer / media</td><td>Likely organic</td><td class="num">391,606</td><td class="num">n/r</td><td>Dirty soda</td></tr>
+        <tr><td>Purple Cotton Candy × Becky G giveaway (17 Jun, IG)</td><td>@alaninutrition</td><td>Brand</td><td>Brand-owned</td><td>Confirmed brand content</td><td class="num">26,297</td><td class="num">1.49M</td><td>Alani PCC</td></tr>
+        <tr><td>New-drop roundups (May–Jul, IG)</td><td>@snackolator</td><td>Mid-tier (~780K reach/post)</td><td>Media / publisher-style creator</td><td>Influencer-led, sponsorship unknown</td><td class="num">3.4–15.1K</td><td class="num">777–792K</td><td>Ghost, Alani, Monster</td></tr>
+        <tr><td>"Didn't we learn from Poppi?" prebiotic critique (16 Jun, TikTok)</td><td>Nutritionist "Gabbi"</td><td>Micro</td><td>Organic consumer (expert)</td><td>Likely organic</td><td class="num">88,743</td><td class="num">n/r</td><td>Pepsi prebiotic / Poppi</td></tr>
+        <tr><td>Crumbl Dirty Sodas sugar callout (8 Jun, IG)</td><td>@drmarkhyman</td><td>Mega</td><td>Influencer-led (health expert)</td><td>Likely organic</td><td class="num">53,719</td><td class="num">3.74M</td><td>Dirty soda</td></tr>
+        <tr><td>Poppi Lemonade giveaway (29 Jun, IG)</td><td>@drinkpoppi</td><td>Brand</td><td>Brand-owned</td><td>Confirmed brand content</td><td class="num">16,739</td><td class="num">681K</td><td>Poppi Lemonade</td></tr>
+        <tr><td>Rob Rausch × Poppi (17 Jun, IG)</td><td>@drinkpoppi</td><td>Brand + celebrity</td><td>Disclosed partnership</td><td>Confirmed sponsored</td><td class="num">9,066</td><td class="num">n/r</td><td>Poppi</td></tr>
+        <tr><td>Circle K × Celsius Electric Vibe (28 Apr, news)</td><td>CStore Decisions</td><td>Trade press</td><td>Media / publisher</td><td>Editorial</td><td class="num">2,096</td><td class="num">n/r</td><td>Electric Vibe</td></tr>
+        <tr><td>Cherry Twist fan posts (Jun–Jul, Pinterest)</td><td>@jamie_averyelise, @rachelvioletrey</td><td>Nano</td><td>Organic consumer</td><td>Likely organic</td><td class="num">716–833</td><td class="num">low</td><td>Alani Cherry Twist</td></tr>
+        <tr><td>Cooler-expansion tease (18 May, IG)</td><td>@gorillamindenergy</td><td>Brand</td><td>Brand-owned</td><td>Confirmed brand content</td><td class="num">3,057</td><td class="num">n/r</td><td>Gorilla Mind</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Tiers: Nano &lt;10K · Micro 10–100K · Mid 100–500K · Macro 500K–1M · Mega &gt;1M followers (configurable). Follower count does not prove sponsorship. n/r = not reported by platform for this item.</p>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Virality quality by trend <span class="prov model">MODELLED</span></h3>
+      <div class="tscroll"><table>
+        <thead><tr><th>Trend</th><th>Creator concentration</th><th>Organic ratio</th><th>Purchase-intent language</th><th>Cross-platform</th><th>Quality score</th></tr></thead>
+        <tbody>
+          <tr><td>Olipop core</td><td>Low (diverse)</td><td>High</td><td>Present ("restock", "where to buy")</td><td>IG + TikTok + Pinterest</td><td><div class="sbar"><div class="track"><div class="fill" style="width:74%"></div></div><span class="v">74</span></div></td></tr>
+          <tr><td>Poppi Lemonade</td><td>Medium</td><td>Medium (brand push + organic)</td><td>Present</td><td>IG + TikTok + TV (Love Island)</td><td><div class="sbar"><div class="track"><div class="fill" style="width:62%"></div></div><span class="v">62</span></div></td></tr>
+          <tr><td>Alani Purple Cotton Candy</td><td>Medium-high (Becky G weight)</td><td>Building</td><td>Strong ("has landed", availability-seeking)</td><td>IG-led</td><td><div class="sbar"><div class="track"><div class="fill" style="width:58%"></div></div><span class="v">58</span></div></td></tr>
+          <tr><td>Dirty soda</td><td>Low (many voices)</td><td>Medium (QSR-seeded)</td><td>High trial language, meme component</td><td>TikTok + news + IG</td><td><div class="sbar"><div class="track"><div class="fill" style="width:51%"></div></div><span class="v">51</span></div></td></tr>
+          <tr><td>Celsius Electric Vibe</td><td>Very high (1 outlet)</td><td>Low — no consumer pickup yet</td><td>None detected</td><td>News only</td><td><div class="sbar"><div class="track"><div class="fill" style="width:44%"></div></div><span class="v">44</span></div></td></tr>
+          <tr><td>Pepsi prebiotic</td><td>High (brand + 1 critic)</td><td>Low</td><td>Skeptical intent</td><td>TikTok-led</td><td><div class="sbar"><div class="track"><div class="fill" style="width:32%"></div></div><span class="v">32</span></div></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3>Misleading-virality flags</h3>
+      <div class="callout warn"><b>Campaign burst, no organic pickup:</b> Celsius Electric Vibe — trade coverage without consumer echo. Not a demand signal yet; it is an activation gap.</div>
+      <div class="callout warn"><b>Giveaway-heavy activity:</b> Alani PCC and Poppi Lemonade launches both used giveaways — engagement partially incentive-driven. Watch post-giveaway persistence (4-week rule).</div>
+      <div class="callout danger"><b>Negative virality:</b> Dirty soda carries a 38M-reach health backlash; Pepsi prebiotic's top post is a critique. High volume ≠ favorable volume.</div>
+      <div class="callout warn"><b>Meme attention, unproven purchase intent:</b> Portions of Baja Blast conversation are meme-driven; corroborate with sales before expanding on social signal alone.</div>
+      <div class="callout"><b>Cleanest organic pattern:</b> Olipop — diverse creators, no dominant account, availability-seeking comments, multi-week persistence.</div>
+    </div>
+  </div>
+</section>
+<!-- TAB3 -->
+<section class="tab" id="t4">
+  <h2>Audience &amp; community intelligence</h2>
+  <p class="note">Tribes are networks linked by shared passion, not demographic cells (Meltwater Tribe Intelligence). Community classifications are built from bios, hashtags, content patterns and creator networks — all labels below are <span class="prov model">MODELLED / INFERRED</span>, never verified facts. Opportunity scores use the Soprism index formula (see Methodology tab).</p>
+
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card tight">
+      <h4>Wellness-forward flavor explorers <span class="pill st-accelerating" style="float:right">Opp. 81</span></h4>
+      <p class="note"><b>Products:</b> Poppi, Olipop, Alani Nu · <b>Platforms:</b> Instagram, TikTok, Pinterest · <b>Signals:</b> prebiotic/gut-health language, "flavor of the summer", morning-routine content · <b>Demo indicators:</b> skews female, Gen Z–millennial <span class="prov model">Inferred</span><br><b>Circle K fit:</b> High — morning + afternoon dayparts, single-serve trial. <b>Angle:</b> "better-for-you cold vault" endcap.</p>
+    </div>
+    <div class="card tight">
+      <h4>Gym &amp; pre-workout community <span class="pill st-accelerating" style="float:right">Opp. 76</span></h4>
+      <p class="note"><b>Products:</b> Celsius, Alani Nu, C4, Gorilla Mind, Ghost · <b>Platforms:</b> Instagram, YouTube · <b>Signals:</b> pre-workout timing, macro/caffeine talk, gym-bag content <span class="prov model">Inferred</span><br><b>Circle K fit:</b> High — pre-5pm commuter-to-gym mission. <b>Angle:</b> 2-for energy pricing near protein snacks.</p>
+    </div>
+    <div class="card tight">
+      <h4>Nostalgia snackers / drop-watchers <span class="pill st-emerging" style="float:right">Opp. 72</span></h4>
+      <p class="note"><b>Products:</b> Ghost 7UP/Bubblicious, Alani PCC, LTO culture broadly · <b>Platforms:</b> Instagram (@snackolator network), TikTok · <b>Signals:</b> "first look", drop-roundup follows, collector language <span class="prov model">Inferred</span><br><b>Circle K fit:</b> Medium-high — LTO exclusives convert this tribe to store visits. <b>Angle:</b> "only at Circle K" drop calendar.</p>
+    </div>
+    <div class="card tight">
+      <h4>Dirty-soda / customization culture <span class="pill st-accelerating" style="float:right">Opp. 69</span></h4>
+      <p class="note"><b>Products:</b> Dr Pepper + creamer builds, refreshers · <b>Platforms:</b> TikTok · <b>Signals:</b> recipe content, QSR order hacks; strong in Mountain-West/Sun-Belt culture <span class="prov model">Inferred — geo unverified</span><br><b>Circle K fit:</b> High if dispensed program exists. <b>Angle:</b> fountain "build your own" station.</p>
+    </div>
+    <div class="card tight">
+      <h4>Gamers &amp; late-shift energy users <span class="pill st-sustained" style="float:right">Opp. 63</span></h4>
+      <p class="note"><b>Products:</b> Monster, Red Bull, G Fuel adjacency · <b>Platforms:</b> X, Twitch, YouTube · <b>Signals:</b> gaming session content, night-shift language <span class="prov model">Inferred</span><br><b>Circle K fit:</b> Medium — late daypart, high loyalty potential. <b>Angle:</b> night-owl bundle (energy + snack).</p>
+    </div>
+    <div class="card tight">
+      <h4>Value seekers / promo hunters <span class="pill st-sustained" style="float:right">Opp. 60</span></h4>
+      <p class="note"><b>Products:</b> Any promoted SKU; responded to $1 Slurpee happy hour (7-Eleven) · <b>Platforms:</b> Facebook, IG deal accounts (@nyc_forfree 764K reach) · <b>Signals:</b> freebie/day-deal content <span class="prov model">Inferred</span><br><b>Circle K fit:</b> High but margin-dilutive — use for traffic, not trend validation.</p>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Audience-fit summary per priority product</h3>
+      <div class="tscroll"><table>
+        <thead><tr><th>Product</th><th>Top tribes</th><th>Purchase-intent signal</th><th>Preferred platforms</th><th>Leading voices</th><th>Circle K audience-fit</th></tr></thead>
+        <tbody>
+          <tr><td>Alani Purple Cotton Candy</td><td>Wellness explorers · gym · nostalgia</td><td>Strong (availability-seeking)</td><td>Instagram</td><td>@alaninutrition, Becky G, @snackolator</td><td><div class="sbar"><div class="track"><div class="fill" style="width:84%"></div></div><span class="v">84</span></div></td></tr>
+          <tr><td>Poppi Lemonade</td><td>Wellness explorers</td><td>Present</td><td>IG / TikTok</td><td>@drinkpoppi, Love Island cast</td><td><div class="sbar"><div class="track"><div class="fill" style="width:78%"></div></div><span class="v">78</span></div></td></tr>
+          <tr><td>Olipop</td><td>Wellness explorers</td><td>Strong, persistent</td><td>IG / Pinterest</td><td>Diverse nano/micro — no single voice</td><td><div class="sbar"><div class="track"><div class="fill" style="width:76%"></div></div><span class="v">76</span></div></td></tr>
+          <tr><td>Dirty soda program</td><td>Customization culture · Gen Z</td><td>High trial language</td><td>TikTok</td><td>QSR accounts; @drmarkhyman (counter)</td><td><div class="sbar"><div class="track"><div class="fill" style="width:71%"></div></div><span class="v">71</span></div></td></tr>
+          <tr><td>Celsius Electric Vibe</td><td>Gym · wellness</td><td>Not yet detected</td><td>None (news only)</td><td>Trade press only — gap</td><td><div class="sbar"><div class="track"><div class="fill" style="width:65%"></div></div><span class="v">65</span></div></td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Demographic outputs are labelled Self-declared / Modelled / Inferred / Unknown per brief — everything on this tab is Modelled or Inferred; no self-declared panel data was available in this build.</p>
+    </div>
+    <div class="card">
+      <h3>Relevant cultural moments <span class="prov live">LIVE</span></h3>
+      <div class="callout"><b>Love Island USA/UK summer season</b> — Poppi in-show placement + cast partnerships; wellness-explorer tribe overlap. Window: now–Aug.</div>
+      <div class="callout"><b>World Cup summer (US host)</b> — 7-Eleven FanLand shows c-store activation at scale; beverage-mission traffic spike expected. Window: now–Jul.</div>
+      <div class="callout"><b>NASCAR season</b> — Red Bull Trackhouse LTO can; gamer/motorsport tribe. Window: now–Nov.</div>
+      <div class="callout warn"><b>Halloween drop season</b> — Alani Witch's Brew already teased on 7 Jul; nostalgia/drop-watcher tribe will move early. Decision needed by Aug for Oct shelf.</div>
+    </div>
+  </div>
+</section>
+<!-- TAB4 -->
+<section class="tab" id="t5">
+  <h2>Trend lifecycle &amp; early-signal detection</h2>
+  <p class="note">Stage classification requires multiple concurrent criteria — a product is never labelled "emerging" on volume alone. Stages: Nascent → Emerging → Accelerating → Peaking → Sustained → Declining, plus Resurfacing, Campaign-driven spike, Insufficient evidence.</p>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Stage explanations <span class="prov model">MODELLED on live signals</span></h3>
+    <div class="tscroll"><table>
+      <thead><tr><th>Product / trend</th><th>Stage</th><th>Why (criteria met)</th><th>What would change the stage</th><th>Confidence</th><th>Commercial response window</th></tr></thead>
+      <tbody>
+        <tr><td><b>Alani Purple Cotton Candy</b></td><td><span class="pill st-accelerating">Accelerating</span></td><td>Growth from moderate base (+87% Dec→Jan); multi-week persistence; organic reviews following brand launch; availability-seeking comments; retailer references</td><td>↑ Sustained if elevated volume holds 4+ wks post-giveaway · ↓ Peaking if creator growth stalls and brand content becomes dominant</td><td>High</td><td><b>4–8 weeks</b> — test now, before national saturation</td></tr>
+        <tr><td><b>Dirty soda</b></td><td><span class="pill st-accelerating">Accelerating</span></td><td>Cross-platform spread (TikTok→news→IG); multiple independent QSR adoptions; recipe/trial language; multi-month persistence</td><td>↓ Peaking if QSR promo cycles end without organic continuation; health backlash accelerates decline</td><td>Medium</td><td><b>2–6 weeks</b> — fast-follow or consciously skip</td></tr>
+        <tr><td><b>Poppi Lemonade</b></td><td><span class="pill st-accelerating">Accelerating</span></td><td>Growth on top of positive baseline; new geographic/platform spread via TV placement; strong purchase-intent language</td><td>↑ Sustained if summer push converts to persistent baseline · ↓ Campaign-driven if volume collapses after Love Island season</td><td>Medium-high</td><td><b>4–8 weeks</b> (summer-flavor seasonality)</td></tr>
+        <tr><td><b>Olipop core</b></td><td><span class="pill st-sustained">Sustained</span></td><td>Stable elevated baseline 13 weeks; high organic share; diverse creators; consistent positive sentiment</td><td>↓ Declining if weekly volume drops below ~450 for 4+ wks</td><td>High</td><td>Standing — expand at normal reset cadence</td></tr>
+        <tr><td><b>Baja Blast</b></td><td><span class="pill st-sustained">Sustained</span></td><td>+54% Dec→Jan then stable elevated plateau; persistent fan base; cross-platform</td><td>↑ Resurfacing on LTO news · meme spikes don't change stage</td><td>High</td><td>Standing</td></tr>
+        <tr><td><b>Ghost × 7UP LTO</b></td><td><span class="pill st-emerging">Emerging</span></td><td>New launch with news + creator first-looks; nostalgia driver; but base volume flat and creator growth unproven</td><td>↑ Accelerating if unique creators and organic share rise across 3+ wks · ↓ Campaign-driven if only KDP-pushed content persists</td><td>Medium (data flag on Jan boolean)</td><td><b>6–10 weeks</b> (LTO clock)</td></tr>
+        <tr><td><b>Electrolit flavored hydration</b></td><td><span class="pill st-emerging">Emerging</span></td><td>New exclusive launch; c-store-native momentum; functional-hydration category growth</td><td>Needs creator + search corroboration — currently trade-led</td><td>Low — directional</td><td><b>4–8 weeks</b> for adjacent-flavor response</td></tr>
+        <tr><td><b>Celsius Electric Vibe</b></td><td><span class="pill st-campaign">Campaign-driven</span></td><td>Single-source trade burst; no organic pickup; no purchase-intent language detected</td><td>↑ Emerging if consumer posts appear following activation</td><td>High (about the pattern)</td><td><b>Immediate</b> — LTO window is finite</td></tr>
+        <tr><td><b>Pepsi prebiotic</b></td><td><span class="pill st-campaign">Campaign-driven</span></td><td>Launch burst; dominant response is skeptical; no organic adoption evidence</td><td>↑ Emerging only if organic positive content emerges post-launch</td><td>Medium</td><td>None — monitor</td></tr>
+        <tr><td><b>Ghost Bubblicious · Gorilla Mind · Witch's Brew</b></td><td><span class="pill st-nascent">Nascent</span></td><td>Single tease/first-look posts; insufficient breadth</td><td>↑ Emerging on multi-creator pickup + search growth</td><td>Low</td><td>Watch list — re-score in 2 weeks</td></tr>
+        <tr><td><b>Monster core</b></td><td><span class="pill st-declining">Softening</span></td><td>-10% within window from large base; no new-variant excitement in pull</td><td>↑ Resurfacing on major LTO/campaign</td><td>Medium</td><td>Assortment-neutral; avoid incremental facings</td></tr>
+        <tr><td><b>Dec-2025 TikTok signals</b></td><td><span class="pill st-insufficient">Insufficient evidence</span></td><td>Index gap: Dec-2025 TikTok retrospective returned no usable results under US filter</td><td>Alternative sources (search trends, retailer data) required</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Early-signal watch rules (configured alerts)</h3>
+      <div class="callout"><b>Early opportunity:</b> Social Momentum &gt;70 + creator growth + organic share rising + not stocked/under-ranged + Confidence &gt;60 → alert category head. <i>Currently firing: Alani PCC, Poppi Lemonade.</i></div>
+      <div class="callout"><b>Acceleration:</b> mention velocity +25% WoW + stage change emerging→accelerating. <i>Currently firing: none this week.</i></div>
+      <div class="callout warn"><b>Peaking:</b> growth deceleration + creator stall + brand-amplification dominance. <i>Watch: dirty soda (QSR promo dependence), Alani PCC post-giveaway.</i></div>
+      <div class="callout danger"><b>Competitor action:</b> competitor launches/promotes an emerging product. <i>Fired: Electrolit × 7-Eleven exclusive (7 May).</i></div>
+      <div class="callout sim"><b>Inventory risk:</b> social demand ↑ + sales ↑ + inventory ↓ — requires Circle K feeds; shown with simulated data in Tab 6.</div>
+    </div>
+    <div class="card">
+      <h3>Weekly category-head briefing — this week</h3>
+      <p class="note" style="margin-bottom:8px">Auto-generated summary format per brief §6:</p>
+      <table><tbody>
+        <tr><td><b>New products detected</b></td><td>Alani Witch's Brew (teased) · Red Bull NASCAR LTO · Pepsi prebiotic</td></tr>
+        <tr><td><b>Stage changes</b></td><td>Poppi Lemonade → Accelerating (summer push) · Alani PCC holding Accelerating</td></tr>
+        <tr><td><b>Immediate action</b></td><td>Celsius Electric Vibe amplification (own LTO, clock running)</td></tr>
+        <tr><td><b>Competitor launches</b></td><td>Electrolit Pineapple Coconut @ 7-Eleven · McDonald's Crafted Beverages expansion</td></tr>
+        <tr><td><b>Assortment gaps</b></td><td>Poppi Lemonade unranged (SIM) · Olipop under-faced (SIM)</td></tr>
+        <tr><td><b>State-level</b></td><td>TX: AG probe (Celsius) + distributor suit (Alani) — compliance review before TX energy promos <span class="prov state">State-confirmed</span></td></tr>
+        <tr><td><b>Decisions recommended</b></td><td>Approve Alani PCC 60–100-store test · schedule dirty-soda checkpoint (4 wks) · Halloween LTO decision by mid-Aug</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+<!-- TAB5 -->
+<section class="tab" id="t6">
+  <h2>Social-to-sales validation</h2>
+  <div class="simbanner">⚠ SIMULATED DATA MODE — Circle K first-party feeds (SKU master, weekly sales, inventory, loyalty) are not connected. All sales, availability and margin figures on this tab are <b>synthetic placeholders</b> generated to demonstrate the workflow, clearly marked <span class="prov sim">SIM</span>. No real Circle K commercial data was used, and no missed-opportunity dollar values are estimated (brief §9: never estimate sales without required commercial inputs). Social columns remain <span class="prov live">LIVE</span>.</div>
+
+  <div class="card">
+    <h3>Product classification matrix</h3>
+    <div class="tscroll"><table>
+      <thead><tr><th>Product</th><th>Social momentum <span class="prov live">LIVE</span></th><th>CK availability <span class="prov sim">SIM</span></th><th>CK unit trend <span class="prov sim">SIM</span></th><th>OOS rate <span class="prov sim">SIM</span></th><th>Classification</th><th>Action cue</th></tr></thead>
+      <tbody>
+        <tr><td><b>Poppi Lemonade</b></td><td>82 · accelerating</td><td>0% of stores (lemonade); brand in 40%</td><td>Brand +12% w/w where stocked</td><td>—</td><td><span class="pill risk-hi">A · Missed assortment opportunity</span></td><td>Test</td></tr>
+        <tr><td><b>Electrolit flavored</b></td><td>66 · emerging</td><td>Not stocked (exact SKU 7-E exclusive)</td><td>—</td><td>—</td><td><span class="pill risk-hi">A · Missed assortment opportunity</span></td><td>Adjacent-flavor test</td></tr>
+        <tr><td><b>Alani Purple Cotton Candy</b></td><td>82 · accelerating</td><td>18% of stores (late intro)</td><td>+21% w/w</td><td>9% ⚠</td><td><span class="pill st-accelerating" >B · Validated growth opportunity</span></td><td>Expand + fix OOS</td></tr>
+        <tr><td><b>Celsius core</b></td><td>74 · sustained</td><td>96% of stores</td><td>+8% w/w</td><td>4%</td><td><span class="pill st-accelerating">B · Validated growth opportunity</span></td><td>Increase inventory</td></tr>
+        <tr><td><b>Dr Pepper core 20oz</b></td><td>50 · flat</td><td>100%</td><td>Steady, top-quartile velocity</td><td>2%</td><td><span class="pill st-sustained">C · Hidden commercial performer</span></td><td>Protect facings</td></tr>
+        <tr><td><b>Pepsi prebiotic</b></td><td>45 · campaign burst</td><td>Not stocked</td><td>—</td><td>—</td><td><span class="pill st-campaign">D · Social hype without commercial proof</span></td><td>Do not pursue yet</td></tr>
+        <tr><td><b>Baja Blast singles</b></td><td>68 · sustained</td><td>88%</td><td>Stable</td><td>3%</td><td><span class="pill st-sustained">E · Mature product</span></td><td>Maintain</td></tr>
+        <tr><td><b>Bang core</b></td><td>~35 · declining</td><td>74%</td><td>-6% w/w</td><td>1% (overstock risk)</td><td><span class="pill st-declining">F · Declining product</span></td><td>Reduce exposure</td></tr>
+        <tr><td><b>Ghost Bubblicious</b></td><td>41 · nascent</td><td>Unknown</td><td>—</td><td>—</td><td><span class="pill st-insufficient">G · Insufficient evidence</span></td><td>Re-score in 2 wks</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Lag analysis — social leads sales by how much? <span class="prov sim">SIM</span></h3>
+      <div class="chartbox"><canvas id="chLag"></canvas></div>
+      <p class="note">Correlation of social momentum vs simulated unit sales at 1/2/4/8/12-week lags. In this synthetic demonstration, the 2–4 week lag correlates most strongly — the pattern the production system would test against real transactions. <b>Correlation is not causation</b>; the production build reports correlation windows only.</p>
+    </div>
+    <div class="card">
+      <h3>Retrospective proof-of-value <span class="prov live">Social: LIVE</span> <span class="prov sim">Assortment: SIM</span></h3>
+      <h4 style="color:var(--mw-teal-dark)">December 2025</h4>
+      <p class="note">Socially visible then: Baja Blast (2,147 mentions), Celsius (2,230), Poppi holiday spike (740 in one week — 8 Dec). Liquid Death's flavor line marketing was building. <b>SIM overlay:</b> Poppi ranged in 31% of stores → January restocks missed the early-January wellness reset. TikTok-specific December signals are a coverage gap — flagged, not filled.</p>
+      <h4 style="color:var(--mw-teal-dark);margin-top:10px">January 2026 (kept separate per brief)</h4>
+      <p class="note">Socially emerging then: Baja Blast +54% vs Dec (New Year gaming/fast-food cycle), Alani Nu +87% (resolution/fitness season), Liquid Death flavor line viral moment (48.8K eng, 14.7M reach). <b>SIM overlay:</b> Alani facings unchanged Jan–Mar → simulated under-ranging during its highest-momentum month; Celsius Electric Vibe planning hadn't started until April. <b>No dollar value is estimated</b> — commercial inputs insufficient (brief §9).</p>
+      <div class="callout sim" style="margin-top:8px">With real transaction feeds connected, this panel becomes: emerging-in-month × assortment-at-month × sales-during-following-month, with sized misses where inputs allow.</div>
+    </div>
+  </div>
+</section>
+<!-- TAB6 -->
+<section class="tab" id="t7">
+  <h2>Competitive assortment &amp; promotion intelligence</h2>
+  <p class="note">Competitor moves detected in live media/social signals this period. Tracked set: 7-Eleven, Wawa, QuikTrip, Casey's, Walmart, CVS, Walgreens, Dollar General, Amazon, Costco + QSRs. <b>Only retailers with detected activity are shown</b> — no Wawa, Casey's, QuikTrip or Walmart beverage signal surfaced this period (absence of signal ≠ absence of activity).</p>
+
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card">
+      <h3>Detected competitor activity <span class="prov live">LIVE</span></h3>
+      <div class="tscroll"><table>
+        <thead><tr><th>Competitor</th><th>Move</th><th>Date</th><th>Type</th><th>Consumer response</th></tr></thead>
+        <tbody>
+          <tr><td><b>7-Eleven</b></td><td>Electrolit Pineapple Coconut — chain exclusive</td><td>7 May</td><td>Exclusive product</td><td>Launch eng 14.8K; trade momentum</td></tr>
+          <tr><td><b>7-Eleven</b></td><td>Free Slurpee Day + $1 Slurpees M–F 3–6pm all summer (incl. Speedway/Stripes)</td><td>11 Jul</td><td>Traffic promotion</td><td>Deal-account reach 764K</td></tr>
+          <tr><td><b>7-Eleven</b></td><td>FanLand World Cup store activation (HQ Irving, TX <span class="prov state">State-confirmed</span>)</td><td>5 Jun</td><td>Seasonal campaign</td><td>Reach 120K (trade)</td></tr>
+          <tr><td><b>McDonald's</b></td><td>Crafted Beverages: Dirty Dr Pepper, creamsicle, refreshers — "coming for Sonic"</td><td>25 Apr</td><td>Category expansion</td><td><b>391K engagement</b> single TikTok</td></tr>
+          <tr><td><b>Crumbl</b></td><td>Dirty Sodas launch</td><td>8 Jun</td><td>Category expansion</td><td>Health-critique response 53.7K eng / 3.74M reach</td></tr>
+          <tr><td><b>Dunkin</b></td><td>Summer refreshers / dirty-soda entries</td><td>30 Apr</td><td>Seasonal launch</td><td>Framed as "fast food's new battleground" (10.1M reach)</td></tr>
+          <tr><td><b>Red Bull (supplier)</b></td><td>First retail NASCAR LTO can in 15 years</td><td>29 Jun</td><td>Limited edition</td><td>Trade reach 355K</td></tr>
+          <tr><td><b>Pepsi (supplier)</b></td><td>Prebiotic soda entry + 5 LTO flavors</td><td>16 May–Jun</td><td>New launches</td><td>Skeptical 88.7K-eng critique</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3>Competitive gap table <span class="prov live">Momentum: LIVE</span> <span class="prov sim">Availability: SIM</span></h3>
+      <div class="tscroll"><table>
+        <thead><tr><th>Product</th><th>CK avail. <span class="prov sim">SIM</span></th><th>Competitor avail.</th><th>Timing</th><th>Gap type</th><th>Recommended response</th></tr></thead>
+        <tbody>
+          <tr><td>Electrolit flavored hydration</td><td>Core only, no flavors</td><td>7-Eleven exclusive flavor since May</td><td>CK ~8 wks behind</td><td><span class="pill risk-hi">Assortment + exclusivity gap</span></td><td>Negotiate own exclusive flavor or range adjacent SKUs</td></tr>
+          <tr><td>Dirty-soda formats</td><td>Fountain base only</td><td>McD/Crumbl/Dunkin in-market now</td><td>QSRs first-moving</td><td><span class="pill risk-med">Timing + format gap</span></td><td>20-store dispensed pilot decision in 4 wks</td></tr>
+          <tr><td>Celsius Electric Vibe</td><td><b>CK exclusive</b> — advantage</td><td>None (exclusive)</td><td>CK ahead</td><td><span class="pill risk-low">Awareness gap (own asset)</span></td><td>Amplify before LTO window closes</td></tr>
+          <tr><td>Summer value promo (Slurpee-style)</td><td>Standard promo calendar</td><td>7-Eleven all-summer $1 happy hour</td><td>Running now</td><td><span class="pill risk-med">Promotion gap</span></td><td>Counter with Polar Pop value push in overlap markets</td></tr>
+          <tr><td>Poppi Lemonade</td><td>Unranged</td><td>Grocery + Amazon wide</td><td>CK behind channel</td><td><span class="pill risk-hi">Assortment gap</span></td><td>75-store test</td></tr>
+          <tr><td>Red Bull NASCAR LTO</td><td>Standard range</td><td>All retail (non-exclusive)</td><td>Parity possible</td><td><span class="pill risk-low">No material gap</span></td><td>Stock at parity; motorsport-market stores first</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout danger" style="margin-top:10px"><b>Texas risk cluster <span class="prov state">State-confirmed</span>:</b> AG investigation into Celsius youth marketing (4 Jun) + $1M wrongful-death suit naming Alani Nu's distributor (Weslaco, 14 Apr). Not assortment signals — but any TX energy-drink promotion should route through legal/compliance review first. Arizona and the Carolinas: no state-confirmed signals surfaced this period; treat all AZ/NC/SC reads as US-level proxy.</div>
+    </div>
+  </div>
+</section>
+<!-- TAB7 -->
+<section class="tab" id="t8">
+  <h2>Assortment decision simulator</h2>
+  <div class="simbanner">⚠ DEMONSTRATION MODEL — outputs use live social-momentum scores plus <b>simulated</b> velocity, price and margin assumptions. All projections are illustrative ranges, not forecasts. Human review required before any test is approved.</div>
+
+  <div class="simgrid">
+    <div class="card">
+      <h3>Test parameters</h3>
+      <div class="ctrl"><label>Product</label>
+        <select id="simProd">
+          <option value="alani" selected>Alani Nu Purple Cotton Candy (energy)</option>
+          <option value="poppi">Poppi Lemonade (soft drinks)</option>
+          <option value="ghost">Ghost × 7UP LTO (energy)</option>
+          <option value="dirty">Dirty-soda dispensed pilot</option>
+          <option value="olipop">Olipop expanded facings</option>
+        </select></div>
+      <div class="ctrl"><label>State focus</label>
+        <select id="simState"><option value="txaz" selected>Texas + Arizona</option><option value="ncsc">North + South Carolina</option><option value="all4">All four focus states</option><option value="us">National pilot mix</option></select></div>
+      <div class="ctrl"><label>Number of stores: <b id="simStoresV">75</b></label>
+        <input type="range" id="simStores" min="20" max="300" step="5" value="75"></div>
+      <div class="ctrl"><label>Test duration (weeks): <b id="simWeeksV">8</b></label>
+        <input type="range" id="simWeeks" min="4" max="16" step="1" value="8"></div>
+      <div class="ctrl"><label>Expected retail price ($)</label><input type="number" id="simPrice" value="2.99" step="0.10" min="0.5"></div>
+      <div class="ctrl"><label>Expected gross margin (%)</label><input type="number" id="simMargin" value="42" step="1" min="5" max="80"></div>
+      <div class="ctrl"><label>Promotional support</label>
+        <select id="simPromo"><option value="1.0">None</option><option value="1.18" selected>POS + app offer</option><option value="1.35">POS + app + creator activation</option></select></div>
+      <div class="ctrl"><label>Risk tolerance</label>
+        <select id="simRisk"><option value="con">Conservative</option><option value="bal" selected>Balanced</option><option value="agg">Aggressive</option></select></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="flex" style="justify-content:space-between">
+          <h3 style="margin:0">Recommendation</h3>
+          <span class="decision" id="simDecision">Limited-market test</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="grid g2">
+          <div>
+            <div class="outrow"><span>Recommended test size</span><b id="oStores">—</b></div>
+            <div class="outrow"><span>Recommended states</span><b id="oStates">—</b></div>
+            <div class="outrow"><span>Store clusters</span><b id="oClusters">—</b></div>
+            <div class="outrow"><span>Required initial inventory <span class="prov sim">SIM</span></span><b id="oInv">—</b></div>
+            <div class="outrow"><span>Suggested promotion</span><b id="oPromo">—</b></div>
+            <div class="outrow"><span>Creator / audience activation</span><b id="oCreator">—</b></div>
+          </div>
+          <div>
+            <div class="outrow"><span>Expected upside range <span class="prov sim">SIM</span></span><b id="oUpside">—</b></div>
+            <div class="outrow"><span>Downside scenario <span class="prov sim">SIM</span></span><b id="oDown">—</b></div>
+            <div class="outrow"><span>Success criteria</span><b id="oSuccess">—</b></div>
+            <div class="outrow"><span>Stop criteria</span><b id="oStop">—</b></div>
+            <div class="outrow"><span>Review date</span><b id="oReview">—</b></div>
+            <div class="outrow"><span>Confidence level</span><b id="oConf">—</b></div>
+          </div>
+        </div>
+        <div class="callout sim" style="margin-top:12px" id="oAssump">—</div>
+        <div class="callout danger" id="oRisknote" style="display:none"></div>
+      </div>
+      <div class="card">
+        <h3>Scenario projection <span class="prov sim">SIM</span></h3>
+        <div class="chartbox"><canvas id="chSim"></canvas></div>
+        <p class="note">Weekly unit projection: base / upside / downside bands from simulated comparable-SKU velocity scaled by live Social Momentum score and promo multiplier. Illustrative only.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- TAB8 -->
+<section class="tab" id="t9">
+  <h2>Methodology, scoring &amp; auditability</h2>
+  <p class="note">Every metric on this dashboard defines what it measures, its sources, and whether it is platform-reported, calculated, modelled or simulated. Headline numbers reconcile to the tables shown; theme totals are non-mutually exclusive where noted.</p>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Scoring framework — five transparent scores (0–100), editable weights</h3>
+    <div class="grid g2">
+      <div>
+        <h4>A · Social Momentum <span class="prov model">MODELLED</span></h4>
+        <div id="weightsA"></div>
+        <p class="note">Sum must equal 100%. Live inputs: mention growth/acceleration from weekly pulls; creator growth &amp; organic share from document sampling (directional); search growth not connected this build (weight redistributed, noted).</p>
+        <h4 style="margin-top:14px">Methodology fusion (jedis-methodology)</h4>
+        <p class="note">TPV (Black Swan logic): 0.30×size + 0.40×growth + 0.30×forecast, normalised within category — trajectory beats size. Velocity/relevance (Tastewise logic): wave vs fad via multi-period persistence. Lifecycle + drivers (Mintel): dirty soda → Experiences; Poppi/Olipop → Wellbeing; Ghost 7UP → Identity/nostalgia. Megatrend fit (Euromonitor): Convenience + Healthy Living — durability check. Tribe opportunity (Soprism index): Pen + 3(Pen·Aff) + 3·Cov + 3(Cov·Aff) + Aff, normalised. Stickiness = 0.6×tribe-fit + 0.4×momentum. All reconstructed from public vendor descriptions — analytical inspiration, not proprietary data.</p>
+      </div>
+      <div>
+        <h4>B–E · Other scores</h4>
+        <table><tbody>
+          <tr><td><b>Commercial Validation</b> <span class="prov sim">SIM</span></td><td>Unit/revenue growth, margin, repeat, basket, penetration, sell-through, OOS, comparable SKUs — weights activate when Circle K feeds connect. Shown simulated.</td></tr>
+          <tr><td><b>Competitive Gap</b> <span class="prov model">MODELLED</span></td><td>Competitor availability + timing + promo activity (live signals) vs CK availability (simulated).</td></tr>
+          <tr><td><b>Virality Quality</b> <span class="prov model">MODELLED</span></td><td>Creator diversity, organic ratio, comment quality, cross-platform spread, persistence, purchase intent, low concentration/bot risk.</td></tr>
+          <tr><td><b>Confidence</b> <span class="prov model">MODELLED</span></td><td>Data completeness, entity-match quality, sample size, geographic reliability, platform coverage, time-series depth, first-party availability, cross-source agreement.</td></tr>
+        </tbody></table>
+        <h4 style="margin-top:14px">Entity resolution</h4>
+        <p class="note">Product mentions map to canonical products via boolean variants (e.g. "Ghost" / "Ghost Energy" / "Ghost Sour Patch" → Ghost Energy family). Match confidence is surfaced per product in the Data conf. column; low-confidence matches are <b>not merged</b> (e.g. Ghost Jan-2026 excluded when the boolean broadened to bare "Ghost").</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Metric definitions</h3>
+      <table><tbody>
+        <tr><td><b>Mentions</b></td><td>Calculated — documents matching the generated boolean, US country filter, per Meltwater unified retrieval. Weekly buckets = week beginning Monday.</td></tr>
+        <tr><td><b>Engagement / reach / views</b></td><td>Platform-reported on individual posts; definitions differ per platform — <b>never summed across platforms</b> here. Where a normalised index is needed, it is labelled and the method stated.</td></tr>
+        <tr><td><b>Sentiment</b></td><td>Meltwater document-level classification; splits shown as % of sentiment-classified volume; "unknown" excluded and disclosed.</td></tr>
+        <tr><td><b>Unique creators</b></td><td>Directional — from document sampling, not census counts. Flagged wherever used.</td></tr>
+        <tr><td><b>Geography</b></td><td>US country filter = US-level proxy. State labels applied only when the source itself is state-anchored (e.g. TX AG release) = State-confirmed. No state-inferred claims made this build.</td></tr>
+        <tr><td><b>Trend stage</b></td><td>Calculated — multi-criteria rules on Tab 5; never volume alone.</td></tr>
+        <tr><td><b>Proponent class</b></td><td>Calculated from account ownership, disclosure labels, tier, posting pattern; sponsorship labels are evidence-gated.</td></tr>
+        <tr><td><b>Audience groups</b></td><td>Inferred from bios/hashtags/content patterns — modelled, not verified.</td></tr>
+        <tr><td><b>Duplicates</b></td><td>Syndicated news counted per Meltwater dedup defaults; broadcast transcripts inflate neutral share (disclosed below).</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h3>Data-quality &amp; caveat log (this build)</h3>
+      <table><tbody>
+        <tr><td><span class="pill risk-hi">High</span></td><td><b>TikTok undercount:</b> US-filtered TikTok returned 629 docs vs 173K Instagram — TikTok-native momentum (dirty soda, Poppi) is under-measured in volume stats; inferred via cross-posts, news and per-post engagement instead.</td></tr>
+        <tr><td><span class="pill risk-hi">High</span></td><td><b>Ghost Jan-2026:</b> query-gen broadened boolean to bare "Ghost" → 12,528 figure rejected; Ghost growth math excluded.</td></tr>
+        <tr><td><span class="pill risk-med">Med</span></td><td><b>Sentiment bases:</b> Alani (bare "Alani") and Olipop (generic "prebiotic soda" terms) sentiment pulls used looser booleans than volume pulls — splits shown as directional %, bases disclosed in table footnotes.</td></tr>
+        <tr><td><span class="pill risk-med">Med</span></td><td><b>Dec-2025 TikTok retrospective:</b> empty result set — month flagged as coverage gap; not backfilled.</td></tr>
+        <tr><td><span class="pill risk-med">Med</span></td><td><b>Engagement-sort bias:</b> document sampling over-samples viral content and under-samples routine complaints; qualitative sections note this.</td></tr>
+        <tr><td><span class="pill risk-low">Low</span></td><td><b>Dr Pepper "KDP" pollution</b> (ticker/Kindle) — total flagged. <b>Broadcast-TV volume</b> (3.1M docs) inflates neutral sentiment share for category totals.</td></tr>
+        <tr><td><span class="pill risk-low">Low</span></td><td><b>Booleans regenerate per call</b> — sentiment vs weekly totals differ by design; each table states its own base. Click-through-to-records requires the production Explore link-out (not available in this offline file).</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>AI assistant — every answer carries this contract</h3>
+    <p class="note">The production build ships a conversational analyst. Response contract per brief §7: direct answer · supporting evidence · metrics · data period · geography · confidence · limitations · recommended action. Example:</p>
+    <div class="callout"><b>Q: Which energy drinks are emerging in Texas?</b><br>
+    <b>A:</b> No state-confirmed emergence signal exists for TX this period — social location data supports US-level proxy only. Nationally, Alani Nu Purple Cotton Candy is the strongest accelerating energy product (+87% Dec→Jan, live Meltwater, US filter). TX-specific signals are risk-side: an AG investigation (Celsius) and distributor litigation (Alani) — both State-confirmed news. <i>Period: Dec 2025–Jul 2026 · Confidence: medium · Limitation: no state-level social splits · Action: run TX test with compliance review; treat TX momentum as inferred from national signal.</i></div>
+  </div>
+
+  <div class="card">
+    <h3>Governance</h3>
+    <div class="grid g5">
+      <div class="kpi" style="background:var(--mw-gray)"><div class="l"><b>Decision-support, not decision-making.</b> Human review before any implementation; final call rests with Circle K category owners and Meltwater account owners.</div></div>
+      <div class="kpi" style="background:var(--mw-gray)"><div class="l"><b>No PII.</b> Public handles and aggregated community data only; demographics labelled inferred.</div></div>
+      <div class="kpi" style="background:var(--mw-gray)"><div class="l"><b>Transparent models.</b> Every score shows formula and inputs; weights editable above.</div></div>
+      <div class="kpi" style="background:var(--mw-gray)"><div class="l"><b>Indicative where noted.</b> Modelled and simulated figures are flagged, never dressed as measured fact.</div></div>
+      <div class="kpi" style="background:var(--mw-gray)"><div class="l"><b>Refreshable.</b> All pulls re-runnable weekly; alert thresholds configurable per Tab 5.</div></div>
+    </div>
+  </div>
+</section>
+<!-- TAB9 -->
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <b style="color:#fff">Data sourced from Meltwater unified retrieval · 13 Apr – 12 Jul 2026, Dec 2025, Jan 2026 · US filter</b><br>
+      External signals: live Meltwater pulls (28 statistics queries + 10 document queries, 12 Jul 2026). Scores: modelled estimates on stated formulas (see Methodology tab). Circle K first-party &amp; competitor transaction data: <b style="color:#C9B8E8">SIMULATED for demonstration</b> — no real Circle K data was used or implied.<br>
+      Methodology credits: Black Swan Data (TPV) · Tastewise (velocity/relevance) · Mintel (drivers/lifecycle) · Euromonitor (megatrends/sizing) · YouGov (demand funnel) · Meltwater Tribes / Soprism / Klear — reconstructed from public descriptions, used as analytical inspiration, not proprietary data.
+    </div>
+    <div style="min-width:220px">
+      Decision-support, not decision-making.<br>
+      All outputs require human review and verification before any implementation. Final assortment decisions rest with Circle K category owners.<br>
+      No PII — public creator handles and aggregated data only.
+    </div>
+  </div>
+</footer>
+
+<script>
+// tab switching
+document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabbtn').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(b.dataset.tab).classList.add('active');
+  window.scrollTo({top:0});
+  setTimeout(()=>{if(window.charts)Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}})},60);
+}));
+
+// ---------- LIVE data (Meltwater unified retrieval, pulled 12 Jul 2026, US filter) ----------
+const WEEKS=['13 Apr','20 Apr','27 Apr','4 May','11 May','18 May','25 May','1 Jun','8 Jun','15 Jun','22 Jun','29 Jun','6 Jul'];
+const ENERGY=[918881,869888,901836,892713,914464,867513,855436,839209,880224,878972,1000250,957488,814394];
+const SODA=[710250,633143,632979,674165,739258,735115,666595,658669,677928,650015,699940,667551,540798];
+const BRANDS={
+  alani:[391,156,227,569,264,215,190,784,523,586,325,266,141],
+  celsius:[641,261,388,668,549,830,231,1250,508,577,271,482,418],
+  poppi:[208,161,613,770,553,1214,210,882,258,321,205,342,310],
+  olipop:[496,452,457,613,1399,604,639,695,637,670,1056,541,411],
+  ghost:[252,198,208,185,190,170,161,210,158,257,186,165,181],
+  baja:[899,790,2632,876,2426,3373,1598,1229,2822,1481,1276,1452,1421]
+};
+const TEAL='#28BBBB',TEALD='#1C7070',ORANGE='#FF6221',GRAY='#B9C4C4',PURP='#7A5CA8';
+Chart.defaults.font.family='Poppins';Chart.defaults.font.size=11;Chart.defaults.color='#555';
+
+function idx(arr){const b=arr[0]||1;return arr.map(v=>Math.round(v/b*100))}
+
+window.charts={};
+function mkCharts(){
+  if(charts.cat)return;
+  charts.cat=new Chart(document.getElementById('chCat'),{type:'line',data:{labels:WEEKS,datasets:[
+    {label:'Energy drinks',data:ENERGY,borderColor:TEALD,backgroundColor:TEALD,tension:.3,pointRadius:2},
+    {label:'Soft drinks / soda',data:SODA,borderColor:TEAL,backgroundColor:TEAL,tension:.3,pointRadius:2}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>(v/1e6).toFixed(1)+'M'}}}}});
+  charts.idx=new Chart(document.getElementById('chIdx'),{type:'line',data:{labels:WEEKS,datasets:[
+    {label:'Alani Nu',data:idx(BRANDS.alani),borderColor:TEALD,tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Celsius',data:idx(BRANDS.celsius),borderColor:TEAL,tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Poppi',data:idx(BRANDS.poppi),borderColor:ORANGE,tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Olipop',data:idx(BRANDS.olipop),borderColor:PURP,tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Ghost',data:idx(BRANDS.ghost),borderColor:GRAY,tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Baja Blast',data:idx(BRANDS.baja),borderColor:'#1A1A1A',tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[4,3]}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'index (wk1 = 100)'}}}}});
+  charts.lag=new Chart(document.getElementById('chLag'),{type:'bar',data:{labels:['1 wk','2 wks','4 wks','8 wks','12 wks'],datasets:[
+    {label:'Correlation (simulated demo)',data:[0.31,0.58,0.62,0.41,0.22],backgroundColor:[GRAY,TEAL,TEALD,GRAY,GRAY]}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:1,title:{display:true,text:'r (illustrative)'}}}}});
+  mkSimChart();
+}
+document.addEventListener('DOMContentLoaded',mkCharts);
+
+// ---------- Social Momentum weights editor ----------
+const WA=[['Mention growth',15],['Mention acceleration',15],['Unique-creator growth',15],['Engagement growth',10],['Organic creator share',10],['Cross-platform spread',10],['Geographic spread',10],['Search growth (not connected)',10],['Purchase-intent language',5]];
+const waBox=document.getElementById('weightsA');
+WA.forEach((w,i)=>{
+  const r=document.createElement('div');r.className='wrow';
+  r.innerHTML=`<span>${w[0]}</span><input type="range" min="0" max="40" value="${w[1]}" data-i="${i}"><b class="wv">${w[1]}%</b>`;
+  waBox.appendChild(r);
+});
+const wsum=document.createElement('div');wsum.className='wrow';wsum.innerHTML='<b>Total</b><span></span><b id="wTotal">100%</b>';waBox.appendChild(wsum);
+waBox.addEventListener('input',()=>{
+  let t=0;waBox.querySelectorAll('input').forEach(inp=>{t+=+inp.value;inp.parentElement.querySelector('.wv').textContent=inp.value+'%'});
+  const el=document.getElementById('wTotal');el.textContent=t+'%';el.style.color=(t===100?'#1C7070':'#C0392B');
+});
+
+// ---------- Decision simulator (SIMULATED assumptions, clearly labelled) ----------
+const PRODUCTS={
+  alani:{name:'Alani Nu Purple Cotton Candy',mom:82,conf:72,baseVel:9.5,creator:'Micro/nano gym + wellness creators; ride Becky G moment',cluster:'High energy-velocity stores near gyms/campuses',stop:'Velocity <60% of comparable Alani SKUs at week 4',risk:'TX distributor litigation headline risk — compliance review for TX stores'},
+  poppi:{name:'Poppi Lemonade',mom:76,conf:68,baseVel:7.0,creator:'Wellness-explorer nano creators; morning-routine content',cluster:'Suburban + campus-adjacent, morning-traffic stores',stop:'Velocity <55% of Poppi core at week 4',risk:'Prebiotic-claims scrutiny; keep health claims off POS'},
+  ghost:{name:'Ghost × 7UP LTO',mom:58,conf:55,baseVel:5.5,creator:'Drop-watcher accounts (@snackolator-style seeding)',cluster:'LTO-responsive stores with strong energy sets',stop:'Sell-through <40% by mid-LTO',risk:'LTO clock — late entry risks markdown; Jan data flag lowers confidence'},
+  dirty:{name:'Dirty-soda dispensed pilot',mom:85,conf:55,baseVel:11.0,creator:'TikTok recipe creators; user-generated builds',cluster:'Fountain-equipped, Gen Z-heavy trade areas',stop:'Attachment <5% of fountain transactions at week 3',risk:'Health-backlash exposure (186g-sugar narrative); trend may peak pre-rollout'},
+  olipop:{name:'Olipop expanded facings',mom:72,conf:74,baseVel:6.2,creator:'None needed — organic demand; shelf-talker only',cluster:'Stores with existing functional-beverage velocity',stop:'No lift vs control at week 6',risk:'Cooler-space opportunity cost'}
+};
+const STATES={txaz:{label:'Texas + Arizona',cl:'Sun-belt commuter + gym clusters'},ncsc:{label:'North + South Carolina',cl:'Campus + interstate clusters'},all4:{label:'TX, AZ, NC, SC',cl:'Mixed pilot across all four'},us:{label:'National pilot mix',cl:'Representative national sample'}};
+const RISKF={con:.8,bal:1,agg:1.25};
+
+function runSim(){
+  const p=PRODUCTS[document.getElementById('simProd').value];
+  const st=STATES[document.getElementById('simState').value];
+  const stores=+document.getElementById('simStores').value;
+  const weeks=+document.getElementById('simWeeks').value;
+  const price=+document.getElementById('simPrice').value||2.99;
+  const margin=(+document.getElementById('simMargin').value||42)/100;
+  const promo=+document.getElementById('simPromo').value;
+  const rk=document.getElementById('simRisk').value;
+  document.getElementById('simStoresV').textContent=stores;
+  document.getElementById('simWeeksV').textContent=weeks;
+
+  // SIMULATED model: weekly units/store = baseVel × momentum factor × promo × risk posture
+  const momF=0.6+(p.mom/100)*0.8;
+  const base=p.baseVel*momF*promo;
+  const up=base*1.35,down=base*0.55;
+  const rev=(v)=>v*stores*weeks*price;
+  const gp=(v)=>rev(v)*margin;
+  const fmt=(n)=>'$'+Math.round(n).toLocaleString();
+  const recStores=Math.round(Math.min(300,Math.max(20,stores*RISKF[rk])));
+
+  let decision='Limited-market test';
+  if(p.conf<58)decision='Monitor weekly';
+  if(p.mom>=70&&p.conf>=70&&rk==='agg')decision='Expand distribution';
+  if(rk==='con'&&p.conf<65)decision='Monitor weekly';
+  document.getElementById('simDecision').textContent=decision;
+
+  document.getElementById('oStores').textContent=recStores+' stores';
+  document.getElementById('oStates').textContent=st.label;
+  document.getElementById('oClusters').textContent=p.cluster;
+  document.getElementById('oInv').textContent=Math.round(base*recStores*2).toLocaleString()+' units (2-wk cover)';
+  document.getElementById('oPromo').textContent=promo>1.2?'POS + app + creator burst':(promo>1?'POS + app offer':'None (clean read)');
+  document.getElementById('oCreator').textContent=p.creator;
+  document.getElementById('oUpside').textContent=fmt(gp(base))+' – '+fmt(gp(up))+' gross profit';
+  document.getElementById('oDown').textContent=fmt(gp(down))+' (55% of base velocity)';
+  document.getElementById('oSuccess').textContent='Unit velocity ≥ comparable SKUs; repeat ≥18%; basket attachment lift';
+  document.getElementById('oStop').textContent=p.stop;
+  const d=new Date();d.setDate(d.getDate()+weeks*7);
+  document.getElementById('oReview').textContent=d.toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('oConf').textContent=p.conf+'/100 ('+(p.conf>=70?'proceed':'proceed with caution')+')';
+  document.getElementById('oAssump').innerHTML='<b>Key assumptions (all SIMULATED):</b> base velocity '+p.baseVel.toFixed(1)+' units/store/wk from synthetic comparable-SKU set · momentum factor '+momF.toFixed(2)+' from live Social Momentum '+p.mom+' · promo multiplier '+promo+' · price $'+price.toFixed(2)+' · margin '+(margin*100).toFixed(0)+'%. Replace with Circle K comparable-SKU velocity on data connection.';
+  const rn=document.getElementById('oRisknote');
+  rn.style.display='block';rn.innerHTML='<b>Primary risk:</b> '+p.risk;
+
+  if(charts.sim){
+    const mk=(v)=>Array.from({length:weeks},(_,i)=>Math.round(v*stores*(1+0.25*Math.sin(i/2))*(i<2?0.7+0.15*i:1)));
+    charts.sim.data.labels=Array.from({length:weeks},(_,i)=>'Wk '+(i+1));
+    charts.sim.data.datasets[0].data=mk(up);
+    charts.sim.data.datasets[1].data=mk(base);
+    charts.sim.data.datasets[2].data=mk(down);
+    charts.sim.update();
+  }
+}
+function mkSimChart(){
+  charts.sim=new Chart(document.getElementById('chSim'),{type:'line',data:{labels:[],datasets:[
+    {label:'Upside',data:[],borderColor:TEAL,backgroundColor:'rgba(40,187,187,.12)',fill:'+1',tension:.35,pointRadius:0},
+    {label:'Base',data:[],borderColor:TEALD,tension:.35,pointRadius:0,borderWidth:2.5},
+    {label:'Downside',data:[],borderColor:'#C0392B',borderDash:[5,4],tension:.35,pointRadius:0,fill:false}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'units / week (simulated)'}}}}});
+  runSim();
+}
+['simProd','simState','simStores','simWeeks','simPrice','simMargin','simPromo','simRisk'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',runSim);
+});
+</script>
+</body>
+</html>
